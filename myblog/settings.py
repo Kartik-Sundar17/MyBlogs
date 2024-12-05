@@ -82,9 +82,9 @@ WSGI_APPLICATION = 'myblog.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Kartik',
+        'NAME': 'Name of your Database',
         'USER':'postgres',
-        'PASSWORD':'1234',
+        'PASSWORD':'Database password',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -160,8 +160,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # Your email host
 EMAIL_PORT = 587  # Port for email host (587 for TLS)
 EMAIL_USE_TLS = True  # Whether to use TLS (True for most email providers)
-EMAIL_HOST_USER = 'kartiksundar75@gmail.com'  # Your email username
-EMAIL_HOST_PASSWORD = 'jmloybcvnjxxlnlg'  # Your email password
+EMAIL_HOST_USER = 'Your email username'  
+EMAIL_HOST_PASSWORD = 'Your email password'   
 
 
 
