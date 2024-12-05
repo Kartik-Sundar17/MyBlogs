@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %} Delete Comment {% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+    {% if user == comment.user.id or user == comment.post.author %}
+    <br/><br/>
+        <h1>Delete comment</h1>
+        <br/><br/>
+        <h3>Delete: {{ comment.id }}</h3>
+        <br/>
+        <div class="mb-3">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <strong>Are You Sure?</strong><br/><br/>
+                <button type="submit" class="btn btn-secondary">Delete</button>
+            </form>
+        </div>
+    {% else %}
+        You do not have access to this page!
+    {% endif %}
+{% else %}
+    You do not have access to this page!
+{% endif %}
+{% endblock %}

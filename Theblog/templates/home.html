@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    body {
+        background-color: white; /* Background color for the entire page */
+    }
+
+    .card {
+        background-color: white; /* Background color for the cards */
+        margin-bottom: 20px; /* Margin between cards */
+        margin-right: 30px;
+        margin-left: 30px;
+    }
+
+    .card:hover {
+        transform: scale(1.1); /* Zoom effect on hover */
+        transition: transform 0.5s ease;
+        z-index: 1; /* Ensure the hovered card appears forward */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8); /* Dark shadow */
+    }
+
+    /* Center the carousel */
+    #carouselExampleCaptions {
+        margin: 0 auto;
+        width: 80%; /* Adjust the width as needed */
+    }
+
+    /* Ensure carousel items are clickable */
+    .carousel-item {
+        cursor: pointer;
+        position: relative; /* Ensure relative positioning for absolute positioning of text */
+    }
+
+    /* Style for carousel snippets */
+    .carousel-caption {
+        color: black; /* Text color */
+        background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white background */
+        padding: 20px; /* Padding for better visibility */
+        position: absolute; /* Position absolutely within the carousel item */
+        bottom: 0; /* Align to the bottom */
+        width: 100%; /* Width 100% */
+        text-align: left; /* Align text to the left */
+        overflow: auto; /* Enable scrolling if content exceeds the box */
+        height: auto; /* Auto-adjust height based on content */
+    }
+
+    .custom-heading {
+        font-family: 'Brush Script MT', cursive; /* Custom font for heading */
+        font-size: 40px; /* Adjust font size */
+    }
+
+    .custom-author {
+        font-family: serif; /* Custom font for author */
+        font-size: 16px; /* Adjust font size */
+        color: #555; /* Text color */
+    }           
+
+    .custom-snippet {
+        font-family: 'Brush Script MT', cursive; /* Custom font for snippet */
+        font-size: 20px; /* Adjust font size */
+    }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        background-color: rgba(0, 0, 0, 0.2); /* Semi-transparent background */
+        border-radius: 100%; /* Circular icons */
+        padding: 15px; /* Padding for visibility */
+    }
+
+    .carousel-caption {
+        position: relative;
+        left: 0;
+        top: 0;
+        bottom: auto;
+        text-align: left;
+    }
+
+    .rounded-start {
+        border-top-left-radius: .375rem !important;
+        border-bottom-left-radius: .375rem !important;
+    }
+
+    .rounded-end {
+        border-top-right-radius: .375rem !important;
+        border-bottom-right-radius: .375rem !important;
+    }
+
+    .rounded-end.overflow-hidden {
+        overflow: hidden; /* Ensure content respects rounded corners */
+    }
+
+    .h-100 {
+        height: 100% !important; /* Ensure div fills the height */
+    }
+
+    .carousel-image {
+        width: 100%;
+        height: 350px;
+        object-fit: cover; /* Ensure the image covers the div */
+        border-radius: 50px;
+    }
+
+    .custom-snippet {
+        font-size: 18px; /* Adjust the font size as needed */
+    }
+
+    .card-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover; /* Ensure the image covers the div */
+        border-radius: 14px;
+    }
+</style>
+<br/>
+<h1 class="custom-heading">Trending Posts</h1>
+<hr>
+<br/>
+<br/>
+
+<!-- Carousel structure -->
+<div id="carouselExampleCaptions" class="carousel slide">
+    <div class="carousel-indicators">
+        {% for post in trending_posts %}
+            <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %} aria-label="Slide {{ forloop.counter }}"></button>
+        {% endfor %}
+    </div>
+    <div class="carousel-inner">
+        {% for post in trending_posts %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}" onclick="window.location.href='{{ post.get_absolute_url }}';">
+                <a href="{% url 'article-detail' post.pk %}" class="stretched-link"></a>
+                <div class="row">
+                    <div class="col-md-5 bg-light d-flex align-items-center justify-content-center rounded-start">
+                        <!-- Text side (40%) -->
+                        <div class="carousel-caption text-dark w-100">
+                            <h3 class="font-weight-bold custom-heading">{{ post.title }}</h3>
+                            <div class="d-flex align-items-center mb-2">
+                                {% if post.author.profile.profile_pic %}
+                                    <img src="{{ post.author.profile.profile_pic.url }}" class="img-fluid rounded-circle" style="width: 40px; height: 40px;" alt="Profile Picture">
+                                {% else %}
+                                    <img src="{% static 'theblog/images/default_profile.png' %}" class="img-fluid rounded-circle" style="width: 40px; height: 40px;" alt="Default Profile Picture">
+                                {% endif %}
+                                <span class="ms-2 custom-author">By: {{ post.author.first_name }} {{ post.author.last_name }}</span>
+                            </div>
+                            <br/>
+                            <p class="custom-snippet">{{ post.snippet }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-7 rounded-end overflow-hidden">
+                        <!-- Image side (60%) with rounded corners -->
+                        <div class="h-100">
+                            <img loading="lazy" src="{{ post.img.url }}" class="carousel-image" alt="{{ post.title }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <!-- Carousel controls -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+
+<br/><br/><br/>
+
+<hr>
+<h1 class="custom-heading">Recent Posts</h1>
+<hr>
+<br/>
+<div class="container">
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for post in object_list %}
+            <div class="col">
+                <div class="card h-100">
+                    <a href="{% url 'article-detail' post.pk %}">
+                        {% if post.img %}
+                            <img src="{{ post.img.url }}" class="card-img-top card-image" alt="{{ post.title }}">
+                        {% else %}
+                            <img src="{% static 'path/to/default_image.jpg' %}" class="card-img-top card-image" alt="Default image">
+                        {% endif %}
+                    </a>
+                    <div class="card-body" style="height: 180px;"> <!-- Adjust height as needed -->
+                        <h5 class="card-title">
+                            <a href="{% url 'article-detail' post.pk %}" style="font-weight: bold; color: black;" class="stretched-link">
+                                {{ post.title }}
+                            </a>
+                        </h5>
+                        <p class="card-text">
+                            <a href="{% url 'cat' post.cat.title %}" class="badge badge-primary">
+                                {{ post.cat }}                        
+                            </a>
+                            <br/>
+                            <small class="text-muted">{{ post.author.first_name }} {{ post.author.last_name }} - {{ post.add_date }}</small>
+                        </p>
+                        <hr>
+                        <p class="card-text">{{ post.content | truncatewords_html:10 | safe }}</p> <!-- Adjust number of words displayed -->
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>   
+</div>
+
+<br/><br/>
+<!-- Pagination Controls -->
+<div class="d-flex justify-content-center">
+    {% if is_paginated %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active" aria-current="page">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+
+<br/><hr><br/><br/><br/>
+{% endblock %}

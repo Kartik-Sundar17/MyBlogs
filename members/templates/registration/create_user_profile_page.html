@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %} 
+Create New Profile
+{% endblock%}
+
+{% block content %}
+
+
+{% if user.is_authenticated %}
+    <h1>Create Profile</h1>
+    <br/><br/>
+
+    <div class="mb-3">
+    <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+             {{ form.media }}
+       
+    <button type="submit" class="btn btn-secondary">Create</button>
+    </form>
+    </div>
+
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        <ul>
+        {% for field, errors in form.errors.items %}
+            <li><strong>{{ field }}:</strong> {{ errors|striptags }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+    
+
+    {% endif %}
+
+
+{% else %}    
+    You Do Not Hvae Access To This Page!
+
+{% endif %}
+
+<br><br/>
+<a href="{% url 'Home' %}"><button type="button" class="btn btn-secondary">Back</button></a>
+
+
+
+{% endblock %}

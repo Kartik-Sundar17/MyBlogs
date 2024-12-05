@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+
+<h1>Edit Settings</h1>
+<br/><br/>
+
+{{ user.profile.bio }}
+
+<div class="mb-3">
+  <form id="editProfileForm" method="POST" action="{% url 'edit_profile' %}">
+    {% csrf_token %}
+    <div>
+      {% for message in messages %}
+        <h3>{{ message }}</h3>
+      {% endfor %}
+    </div>
+
+    <!-- First name input field -->
+    <div class="form-group">
+      <label for="id_first_name">First name:</label>
+      {{ form.first_name }}
+    </div>
+
+    <!-- Last name input field -->
+    <div class="form-group">
+      <label for="id_last_name">Last name:</label>
+      {{ form.last_name }}
+    </div>
+
+    <!-- Username input field -->
+    <div class="form-group">
+      <label for="id_username">Username:</label>
+      {{ form.username }}
+    </div>
+
+    <!-- Email input field -->
+    <div class="form-group">
+      <label for="id_email">Email:</label>
+      {{ form.email }}
+    </div>
+    <div class="form-group">
+    
+    
+    <a href="{% url 'password_reset' %}">Forgot Password?</a>
+  </div>
+
+    <button type="submit" class="btn btn-primary">Update</button>
+  </form>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('editProfileForm').addEventListener('submit', function(event) {
+      var email = document.getElementById('id_email').value;
+      var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+      if (!emailPattern.test(email)) {
+        alert('Please enter a valid email address (e.g., username@domain.com).');
+        event.preventDefault();
+      }
+    });
+  });
+</script>
+<br><br/>
+<a href="{% url 'Home' %}"><button type="button" class="btn btn-secondary">Back</button></a>
+<style>
+  .form-group {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+  }
+
+  .form-group label {
+    flex: 0 0 150px;
+    text-align: right;
+    margin-right: 10px;
+  }
+
+  .form-group input {
+    flex: 1;
+  }
+
+  .mb-3 {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .btn-primary {
+    display: block;
+    margin: 20px auto;
+  }
+</style>
+
+{% endblock %}

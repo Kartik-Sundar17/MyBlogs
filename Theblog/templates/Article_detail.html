@@ -1,0 +1,445 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} 
+{{ post.title_tag }}
+{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+
+<div class="row">
+    <div class="col-md-8">
+        <h1>{{ post.title }}</h1>
+    </div>
+    <br/>
+    <div class="col-md-4">
+        <div class="d-flex justify-content-end align-items-center">
+            <form id="likeForm" action="{% url 'like_posts' post.pk %}" method="POST" class="d-inline">
+                {% csrf_token %}
+                <button id="likeButton" type="button" class="btn btn-sm {% if request.user in post.likes.all %}btn-primary{% else %}btn-secondary{% endif %}">
+                    Like
+                </button>
+                <span id="likeCounter" class="ms-2">{{ post.total_likes }}</span> Likes
+            </form>
+
+            <div class="dropdown ms-3">
+                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    &#x22EE; <!-- Unicode for vertical ellipsis (three dots) -->
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    {% if user.is_authenticated %}
+                        {% if user.id == post.author.id %}
+                            <li>
+                                <a href="{% url 'update_post' post.pk %}" class="dropdown-item">Edit</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'delete_post' post.pk %}" class="dropdown-item">Delete</a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                    <li>
+                        <a href="{% url 'add_comment' post.pk %}" class="dropdown-item">Comment</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'download_word_document' post.pk %}" class="dropdown-item">Download Post</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<small>
+    By: {{ post.author.first_name }} {{ post.author.last_name }} - {{ post.add_date }}
+    
+</small>
+
+
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var likeForms = document.querySelectorAll('[id^="likeForm-"]');
+        likeForms.forEach(function(likeForm) {
+            var likeButton = likeForm.querySelector('button');
+            var likeCounter = likeForm.querySelector('span');
+
+            likeButton.addEventListener('click', function() {
+                // Toggle button color immediately
+                likeButton.classList.toggle('btn-primary');
+                likeButton.classList.toggle('btn-secondary');
+
+                // Send AJAX request to like/unlike the comment
+                fetch(likeForm.action, {
+                    method: 'POST',
+                    body: new FormData(likeForm),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Update like counter based on the response
+                    likeCounter.textContent = data.like_count;
+                })
+                .catch(error => {
+                    // If there's an error, revert button color
+                    likeButton.classList.toggle('btn-primary');
+                    likeButton.classList.toggle('btn-secondary');
+                    console.error('Error:', error);
+                });
+            });
+        });
+    });
+</script>
+<hr>
+<div class="container">
+    <div class="row">
+        <div class="col-md-15">
+            <!-- Text Column -->
+            <div class="text-container">
+                <h1>{{ post.title }}</h1>
+                {% if post.img %}
+                    <img src="{{ post.img.url }}" class="img-fluid post-image" alt="Post Image">
+                {% endif %}
+                {% with post.content|length as content_length %}
+                    {% if content_length > 200 %} <!-- Threshold of 200 words -->
+                        <p id="short-content">{{ post.content|truncatewords:100 }}</p> <!-- Show first 50 words -->
+                        <p id="more-content" style="display: none;">{{ post.content|safe }}</p> <!-- Full content hidden initially -->                                               
+                        <button id="read-more-btn" onclick="toggleReadMore()">Read More</button>
+                    {% else %}
+                        <p>{{ post.content|safe }}</p>
+                       
+                    {% endif %}
+                    
+                {% endwith %}
+            </div>
+            <!-- Code Snippet (Quotation) -->
+                 <div class="quotations-container">
+                     <div class="quotations-container">
+                                    "{{ post.snippet }}"
+                    </div>
+                </div>  
+            <br/>
+            <br/>
+        </div>
+        
+       
+    </div>
+</div>
+
+
+
+
+
+<style>
+.text-container {
+    padding: 20px; /* Add padding around text for better readability */
+    font-family: 'Brush Script MT', cursive; /* Example font-family */
+    font-size: 18px; /* Example font-size */
+    text-align: justify;
+    white-space: pre-line;
+   
+}
+
+.text-container h1 {
+    margin-bottom: 10px; /* Adjust space below the heading to a reasonable value */
+}
+
+.text-container p {
+    margin-top: -130px; /* Adjust space above the paragraph */
+}
+
+.post-image {
+    float: right; /* Float the image to the right */
+    margin-left: 30px; /* Add space between the image and the text */
+    margin-bottom: 20px; /* Add space below the image */
+    margin-top: -100px;
+    height: 550px; /* Maintain aspect ratio */
+    max-width: 30%; /* Set the maximum width of the image */
+    border-radius: 30px; /* Rounds the edges of the image */
+    display: block; /* Ensures the image behaves correctly within its container */
+}
+
+.quotations-container {
+    margin-top: -10px; /* Add margin above quotations */
+    font-family: italic;
+    font-size: 20px; /* Example code font-size */
+}
+
+.quotations-container pre {
+    background-color: #f8f9fa; /* Example background color for code block */
+    padding: 15px; /* Padding for code block */
+    border-radius: 5px; /* Rounded corners for code block */
+    overflow-x: auto; /* Enable horizontal scrolling if code exceeds container */
+}
+
+.quotations-container pre code {
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace; /* Example code font */
+    font-size: 14px; /* Example code font-size */
+    display: block; /* Ensure proper block display */
+}
+
+#read-more-btn {
+    background-color: transparent; /* Transparent background */
+    color: gray; /* Text color */
+    border: 2px solid gray; /* Border color */
+    padding: 10px 20px; /* Add padding */
+    cursor: pointer; /* Pointer cursor on hover */
+    margin-top: 20px; /* Add space above button */
+    border-radius: 5px; /* Rounded corners */
+}
+
+#read-more-btn:hover {
+    background-color: gray; /* Background color on hover */
+    color: white; /* Text color on hover */
+}
+
+</style>
+
+
+
+<style>
+@media (max-width: 992px) {
+    .row {
+        display: flex; /* Use flexbox for row layout */
+        flex-direction: column-reverse; /* Reverse column order on smaller screens */
+    }
+
+    .col-md-8 {
+        order: 2; /* Change order of text column to 2 on smaller screens */
+    }
+
+    .col-md-4 {
+        order: 1; /* Change order of image column to 1 on smaller screens */
+        margin-bottom: 20px; /* Add space between image and text on smaller screens */
+    }
+
+    .image-container {
+        text-align: left; /* Align image to the left on smaller screens */
+    }
+</style>
+
+
+<style>
+.like-and-dropdown-container {
+    display: flex;
+    align-items: center;
+}
+
+.dropdown {
+    margin-left: 10px; /* Adjust the spacing as needed */
+}
+
+.dropdown-toggle::after {
+    display: none; /* Remove the arrow */
+}
+
+.dropdown-menu {
+    background-color: transparent; /* Make the background transparent */
+    border: none; /* Remove border */
+    box-shadow: none; /* Remove shadow */
+}
+
+.dropdown-item {
+    background-color: white; /* Change this to match your design */
+    color: black; /* Change this to match your design */
+}
+
+.dropdown-item:hover {
+    background-color: rgba(0, 0, 0, 0.1); /* Slight hover effect */
+}
+
+}
+</style>
+   
+
+<script>
+/*JS for read more toggle */
+function toggleReadMore() {
+    var shortContent = document.getElementById('short-content');
+    var moreContent = document.getElementById('more-content');
+    var readMoreBtn = document.getElementById('read-more-btn');
+
+    if (moreContent.style.display === "none") {
+        moreContent.style.display = "block";
+        readMoreBtn.textContent = "Read Less";
+        shortContent.style.display = "none";
+    } else {
+        moreContent.style.display = "none";
+        readMoreBtn.textContent = "Read More";
+        shortContent.style.display = "block";
+    }
+}
+</script>
+
+
+
+
+ 
+  
+<hr>
+<br/>
+<h1>Comments....</h1>
+<hr>
+
+{% if not post.comments.all %}
+   <h3>No Comments Yet...</h3>
+   <a href="{% url 'add_comment' post.pk %}" class="btn btn-primary">Comment</a>
+
+{% else %}  
+
+<br/><br/>
+   {% for comment in post.comments.all %}
+    <div class="d-flex mb-3">
+        <div class="me-3">
+            {% if comment.user.profile and comment.user.profile.profile_pic %}
+                <img src="{{ comment.user.profile.profile_pic.url }}" class="rounded-circle border border-primary" style="width: 50px; height: 50px;">
+            {% else %}
+                <img src="{% static 'theblog/images/default profile.png' %}" class="rounded-circle border border-primary" style="width: 50px; height: 50px;">
+            {% endif %}
+        </div>
+        <div class="flex-grow-1">
+            <div class="d-flex align-items-center">
+                <strong>{{ comment.user.username }}</strong>
+                {% if user.is_authenticated %}
+                    {% if user.id == comment.user.id or user == post.author %}
+                        {% if user.id == comment.user.id %}
+                            <!-- User who has commented -->
+                            <form action="{% url 'delete_comment' comment.pk %}" method="POST" class="d-inline ms-3">
+                                {% csrf_token %}
+                                <small>
+                                    <button type="submit" >Delete</button>
+                                </small>
+                            </form>
+                        {% elif user == post.author %}
+                            <!-- Author of the post -->
+                            <form action="{% url 'delete_comment' comment.pk %}" method="POST" class="d-inline ms-3">
+                                {% csrf_token %}
+                                <small>
+                                    <button type="submit" >Delete</button>
+                                </small>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+                <form id="likeForm-{{ comment.pk }}" action="{% url 'like_comment' comment.pk %}" method="POST" class="d-inline ms-3">
+                    {% csrf_token %}
+                    <button id="likeButton-{{ comment.pk }}" type="button" class="btn btn-sm {% if request.user in comment.likes.all %}btn-primary{% else %}btn-secondary{% endif %}">
+                        {% if request.user in comment.likes.all %}Like{% else %}Like{% endif %}
+                    </button>
+                    <span id="likeCounter-{{ comment.pk }}">{{ comment.likes.count }}</span> Likes
+                </form>
+            </div>
+            <div class="mt-2">
+                {{ comment.content }}<br>
+                <small>{{ comment.date_added }}</small>
+            </div>
+        </div>
+    </div>
+    <hr>
+{% endfor %}
+
+
+
+
+
+    <a href="{% url 'add_comment' post.pk %}" class="btn btn-primary">Add Comment</a>       
+    <hr> 
+{% endif %}
+<br><br/>
+
+<div class="card mb-3">
+    <div class="row g-0">
+        <div class="col-md-2 ">
+            {% if post.author.profile.profile_pic %}
+                <img src="{{ post.author.profile.profile_pic.url }}" class="img-fluid rounded-start">
+            {% else %}  
+                <img src="{% static 'theblog/images/default profile.png' %}" class="img-fluid rounded-start">
+            {% endif %}  
+        </div>
+
+       <div class="col-md-10">
+    <div class="card-body">
+        <h5 class="card-title">
+            {{ post.author.first_name }} {{ post.author.last_name }} 
+        </h5>
+        <p class="small text-muted">
+            <a href="{% url 'show_profile_page' post.author.profile.id %}">Profile Page</a>
+            
+            {% if post.author.profile.website_url %}
+               | <a href="{{ post.author.profile.website_url }}">Website</a> 
+            {% endif %}
+            {% if post.author.profile.facebook_url %}
+                | <a href="{{ post.author.profile.facebook_url }}">Facebook</a>
+            {% endif %}
+            {% if post.author.profile.insta_url %}
+                | <a href="{{ post.author.profile.insta_url }}">Insta</a>
+            {% endif %}
+            {% if post.author.profile.twitter_url %}
+                | <a href="{{ post.author.profile.twitter_url }}">Twitter</a>
+            {% endif %}
+        </p> 
+        <p class="card-text"> 
+            {{ post.author.profile.bio | default:"No bio available." }}
+        </p>
+    </div>
+</div>
+
+    </div>
+</div>
+
+{% else %}
+<h3>Login To access This Page!</h3>
+{% endif %}
+
+<br><br/>
+<a href="{% url 'Home' %}"><button type="button" class="btn btn-secondary">Back</button></a>
+
+<br/><br/>
+<hr>
+<br/>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var likeButton = document.getElementById('likeButton');
+        var likeCounter = document.getElementById('likeCounter');
+        var likeForm = document.getElementById('likeForm');
+
+        likeButton.addEventListener('click', function(event) {
+            event.preventDefault();
+
+            // Toggle button color
+            likeButton.classList.toggle('btn-primary');
+            likeButton.classList.toggle('btn-secondary');
+
+            // Update like counter
+            var currentLikes = parseInt(likeCounter.innerText);
+            if (likeButton.classList.contains('btn-primary')) {
+                likeCounter.innerText = currentLikes + 1;
+            } else {
+                likeCounter.innerText = currentLikes - 1;
+            }
+
+            // Send AJAX request to like/unlike the post
+            var formData = new FormData(likeForm);
+
+            fetch(likeForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);  // Log response data if needed
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+</script>
+
+{% endblock %}

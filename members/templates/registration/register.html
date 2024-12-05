@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="registration-box">
+  <h1>Register....</h1>
+  <hr>
+
+  <div class="mb-3">
+    <form id="registrationForm" action="/members/register/" method="POST">
+      {% csrf_token %}
+      <div>
+        {% for message in messages %}
+          <h3>{{ message }}</h3>
+        {% endfor %}
+      </div>
+
+      <!-- First name input field -->
+      <div class="form-group">
+        <label for="first_name">First name:</label>
+        <input type="text" id="first_name" name="first_name" required maxlength="150" pattern="[A-Za-z\s]+">
+      </div>
+      
+
+      <!-- Last name input field -->
+      <div class="form-group">
+        <label for="last_name">Last name:</label>
+        <input type="text" id="last_name" name="last_name" required maxlength="150" pattern="[A-Za-z\s]+">
+      </div>
+
+      <!-- Username input field -->
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required maxlength="150" pattern="[a-zA-Z0-9@.+-_]+">
+      </div>
+
+      <!-- Password input field -->
+      <div class="form-group">
+        <label for="password1">Password:</label>
+        <input type="password" id="password1" name="password1" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^*()_+]).{8,}$">
+      </div>
+
+      <!-- Password confirmation input field -->
+      <div class="form-group">
+        <label for="password2">Password confirmation:</label>
+        <input type="password" id="password2" name="password2" required>
+      </div>
+
+      <!-- Email input field -->
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      
+
+      <button type="submit">Register</button>
+    </form>
+    <br/>
+    Already A User? Login <a href="{% url 'login' %}"> Here...</a>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('registrationForm').addEventListener('submit', function(event) {
+      var password1 = document.getElementById('password1').value;
+      var password2 = document.getElementById('password2').value;
+
+      if (password1 !== password2) {
+        alert('Passwords do not match.');
+        event.preventDefault();
+      }
+
+      var email = document.getElementById('email').value;
+      var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+      if (!emailPattern.test(email)) {
+        alert('Please enter a valid email address (e.g., username@domain.com).');
+        event.preventDefault();
+      }
+    });
+  });
+</script>
+
+<style>
+  body {
+     background-color: #495057; /* Light pastel blue */
+  }
+
+  .registration-box {
+    width: 400px;
+    margin: 50px auto; /* Center the box horizontally */
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+   background-color: #f5f5f5;
+  }
+
+  .registration-box h1 {
+    text-align: center;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+    text-align: left; /* Align form elements to the left */
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 5px; /* Add some spacing between label and input */
+  }
+
+  .form-group input {
+    width: calc(100% - 20px); /* Adjust input width to fill the space */
+    display: block; /* Ensure input fields are on separate lines */
+  }
+
+  .form-group button {
+    width: 100%;
+    padding: 8px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .form-group button:hover {
+    background-color: #0056b3;
+  }
+
+  .mb-3 {
+    margin-top: 20px; /* Added some top margin for space */
+  }
+</style>
+
+
+{% endblock %}

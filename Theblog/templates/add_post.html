@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %} 
+Create New Blog Post
+{% endblock%}
+
+{% block content %}
+
+
+<br/><br/>
+<h1>Add Post</h1>
+<br/><br/>
+
+<div class="mb-3">
+<form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  {{ form.media }}
+  <div class="form-group">
+    <label for="author">Author:</label>
+    <input type="text" id="author" name="author" required readonly>
+  </div>
+  <br/><br/>
+  <button type="submit" class="btn btn-secondary">Post</button>
+</form>
+</div>
+
+{% if form.errors %}
+  <div class="alert alert-danger">
+    <ul>
+      {% for field, errors in form.errors.items %}
+        <li><strong>{{ field }}:</strong> {{ errors|striptags }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
+
+<a href="{% url 'Home' %}"><button type="button" class="btn btn-secondary">Back</button></a>
+<br/>
+<br/>
+<hr>
+
+<script>
+   
+   var  username= "{{ user.first_name }}";
+   
+   
+   document.getElementById("author").value = username;
+</script>
+
+{% endblock %}

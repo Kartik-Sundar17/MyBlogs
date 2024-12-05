@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="login-box">
+  <h1>Login</h1>
+  <br/>
+  <div class="mb-3">
+    <form method="POST" action="{% url 'login' %}">
+      {% csrf_token %}
+      <div>
+        {% for message in messages %}
+          <h3>{{ message }}</h3>
+        {% endfor %}
+      </div>
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <a href="{% url 'password_reset' %}">Forgot Password?</a>
+      </div>
+      <button type="submit">Login</button>
+    </form>
+    <br/><br/>
+    Not a user? Sign Up <a href="{% url 'register' %}">Here...</a>
+  </div>
+</div>
+
+<style>
+  body {
+    background-color: #495057;  /* Light pastel blue */
+  }
+  .login-box {
+    width: 400px;
+    margin: 50px auto; /* Center the box horizontally */
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f5f5f5;
+  }
+
+  .login-box h1 {
+    text-align: center;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+    text-align: center; /* Align form elements to the center */
+  }
+
+  .form-group label {
+    display: block;
+    text-align: left; /* Align label text to the left */
+    margin-bottom: 5px; /* Add some spacing between label and input */
+  }
+
+  .form-group input {
+    width: calc(100% - 20px); /* Adjust input width to fill the space */
+    margin: 0 auto; /* Center the input fields */
+    display: block; /* Ensure input fields are on separate lines */
+  }
+
+  .form-group button {
+    margin-left: 150px; /* Adjust button position */
+    padding: 5px 20px;
+  }
+
+  .mb-3 {
+    margin-top: 20px; /* Added some top margin for space */
+  }
+</style>
+{% endblock %}

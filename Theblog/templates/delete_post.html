@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %} Delete Blog Post {% endblock%}
+
+{% block content %}
+{% if user.is_authenticated %}
+
+{% if user.id == post.author.id %}
+<br/><br/>
+    <h1>Delete Post</h1>
+    <br/><br/>
+      <h3>Delete:{{ post.title }}</h3>
+
+    <br/>
+    <div class="mb-3">
+    <form method="POST"enctype="multipart/form-data">
+  {% csrf_token %}
+  <strong>Are You Sure?</strong><br/><br/>
+  <button type="submit" class="btn btn-secondary">Delete</button>
+    </div>
+    </form>
+    {% else %}
+      You do not have access to this page!
+  {% endif %}  
+
+{% else %}
+
+    You do not have access to this page!
+{% endif %}
+
+
+
+{% endblock %}

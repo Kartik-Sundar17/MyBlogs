@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    body {
+        background-color: white;
+    }
+    .card {
+        background-color: white;
+    }
+    .card:hover {
+        transform: scale(1.1);
+        transition: transform 0.5s ease;
+        z-index: 1;
+        box-shadow: 0 4px 8px rgba(0.5, 0.5, 0.5, 0.5);
+    }
+    .user-profile-card {
+        transition: none !important;
+    }
+    .user-profile-card:hover {
+        transform: none !important;
+    }
+    .profile-stats {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 20px;
+        font-size: 1.2em;
+    }
+    .profile-stats div {
+        text-align: center;
+    }
+    .profile-stats div span {
+        display: block;
+        font-weight: bold;
+        font-size: 1.5em;
+    }
+    .btn-profile {
+        background-color: white;
+        color: black;
+        border: none;
+        font-size: 1.2em;
+        padding: 10px 20px;
+    }
+    .btn-profile:hover {
+        background-color: #333;
+        color: white;
+    }
+    .profile-stats div button {
+        display: block;
+        margin: auto;
+    }
+    .modal-body .list-group-item {
+        display: flex;
+        align-items: center;
+    }
+    .modal-body .list-group-item img {
+        width: 50px;
+        height: 50px;
+        margin-right: 15px;
+    }
+</style>
+
+<h1>User Profile....</h1>
+<br/>
+<hr><br/>
+{% if user.is_authenticated %}
+
+<br/><br/>
+
+<div class="card mb-3 user-profile-card">
+    <div class="row g-0">
+        <div class="col-md-2">
+            {% if object.profile_pic %}
+                <img src="{{ object.profile_pic.url }}" class="rounded-circle border border-primary profile-pic" style="width: 200px; height: 200px;">
+            {% else %}
+                <img src="{% static 'theblog/images/default profile.png' %}" class="rounded-circle border border-primary profile-pic" style="width: 200px; height: 200px;">
+            {% endif %}
+        </div>
+        
+        <div class="col-md-10">
+            <div class="card-body">
+                
+                <br/>
+                <div class="profile-stats">
+                    <div class="btn btn-profile">
+                        <span>{{ post_count }}</span>
+                        Posts
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-profile" data-toggle="modal" data-target="#followersModal">
+                            <span id="followerCount">{{ object.followers.count }}</span>
+                            Followers
+                        </button>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-profile" data-toggle="modal" data-target="#followingModal">
+                            <span>{{ object.following_count }}</span>
+                            Following
+                        </button>
+                    </div>
+                </div>
+                <br/>
+                <h5 class="card-title">
+                    {{ object.user.first_name }} {{ object.user.last_name }} | 
+                    {{ object.user.username }}
+                </h5>     
+                  
+                <br/>
+                <p class="small text-muted">
+                    {% if object.website_url %}
+                        <a href="{{ object.website_url }}">Website</a> |
+                    {% endif %}
+                    {% if object.facebook_url %}
+                        <a href="{{ object.facebook_url }}">Facebook</a> |
+                    {% endif %}
+                    {% if object.insta_url %}
+                        <a href="{{ object.insta_url }}">Insta</a> |
+                    {% endif %}
+                    {% if object.twitter_url %}
+                        <a href="{{ object.twitter_url }}">Twitter</a>
+                    {% endif %}
+                </p> 
+                <p class="card-text"> 
+                    {{ object.bio | default:"No bio available." }}
+                </p>    
+                <br/>
+                {% if user != object.user %}
+                    <form id="followForm" action="{% if user in object.followers.all %}{% url 'unfollow_user' object.pk %}{% else %}{% url 'follow_user' object.pk %}{% endif %}" method="POST" class="d-inline">
+                        {% csrf_token %}
+                        <button id="followButton" type="button" class="btn btn-sm {% if user in object.followers.all %}btn-primary{% else %}btn-primary{% endif %}">
+                            {% if user in object.followers.all %}Unfollow{% else %}Follow{% endif %}
+                        </button>
+                    </form>
+                {% endif %}                 
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Followers Modal -->
+<div class="modal fade" id="followersModal" tabindex="-1" aria-labelledby="followersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="followersModalLabel">Followers</h5><br/>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group">
+                    {% for follower in object.followers.all %}
+                        <li class="list-group-item">
+                            {% if follower.profile.profile_pic %}
+                                <img src="{{ follower.profile.profile_pic.url }}" class="rounded-circle">
+                            {% else %}
+                                <img src="{% static 'theblog/images/default profile.png' %}" class="rounded-circle">
+                            {% endif %}
+                            {{ follower.username }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .modal-title {
+        margin-right: 350px; /* Adjust as needed */
+    }
+</style>
+
+<!-- Following Modal -->
+<div class="modal fade" id="followingModal" tabindex="-1" aria-labelledby="followingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="followingModalLabel">Following</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group">
+                    {% for following in object.user.following.all %}
+                        <li class="list-group-item">
+                            {% if following.profile.profile_pic %}
+                                <img src="{{ following.profile.profile_pic.url }}" class="rounded-circle">
+                            {% else %}
+                                <img src="{% static 'theblog/images/default profile.png' %}" class="rounded-circle">
+                            {% endif %}
+                            {{ following.user.username }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br/>
+<br/>
+<hr>
+<br/>
+<br/>
+<h2>User Posts</h2>
+<br/>
+<div class="container">
+    <div class="row">
+        {% for post in user_posts %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <a href="{% url 'article-detail' post.pk %}" class="stretched-link"></a>
+                        <img src="{{ post.img.url }}" class="card-img-top img-fluid rounded-start" alt="{{ post.title }}" style="height: 250px; width:410px;">
+                        
+                        <h5 class="card-title"><br/>{{ post.title }}</h5>
+                        <hr>
+                        <p class="card-text post-content">{{ post.content | truncatewords_html:25 | safe }}</p>
+                    </div>
+                </div>
+            </div>
+            {% if forloop.counter|divisibleby:3 and not forloop.last %}
+                </div><div class="row">
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+<br/>
+
+{% else %}
+   <h3> Login To Access This Page!</h3>
+{% endif %}   
+
+<br/><br/>
+<a href="{% url 'Home' %}"><button type="button" class="btn btn-secondary">Back</button></a>
+<br/><br/>
+<hr>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const followForm = document.getElementById('followForm');
+    const followButton = document.getElementById('followButton');
+    const followerCount = document.getElementById('followerCount');
+
+    followButton.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const url = followForm.action;
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'followed') {
+                followButton.classList.remove('btn-primary');
+                followButton.classList.add('btn-primary');
+                followButton.textContent = 'Unfollow';
+                followerCount.textContent = data.followers_count;
+                followForm.action = "{% url 'unfollow_user' object.pk %}";
+            } else if (data.status === 'unfollowed') {
+                followButton.classList.remove('btn-primary');
+                followButton.classList.add('btn-primary');
+                followButton.textContent = 'Follow';
+                followerCount.textContent = data.followers_count;
+                followForm.action = "{% url 'follow_user' object.pk %}";
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+});
+</script>
+
+{% endblock %}

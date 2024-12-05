@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %} Edit Blog Post {% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+
+  {% if user.id == post.author.id %}
+  <br/><br/>
+    <h1>Update Post....</h1>
+      <br/><br/>
+
+     <div class="mb-3">
+         <form method="POST" enctype="multipart/form-data">
+           {% csrf_token %}
+            {{ form.as_p }}
+            {{ form.media }}
+          <button type="submit" class="btn btn-secondary">Update</button>
+          </form>
+      </div>
+      {% else %}
+      You do not have access to this page!
+  {% endif %}   
+{% else %}
+
+  You do not have access to this page!
+
+{% endif %}
+
+<br><br/>
+<a href="{% url 'article-detail' post.pk %}"><button type="button" class="btn btn-secondary">Back</button></a>
+
+{% endblock %}

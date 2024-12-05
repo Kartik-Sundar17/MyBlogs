@@ -1,0 +1,179 @@
+<!-- search.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+    <style>
+    body {
+        background-color: white; /* Light gray background color for the entire page */
+    }
+
+    .card {
+        background-color: white; /* Light gray background color for the cards */
+        margin-bottom: 20px; /* Increase the margin between cards */
+        margin-right: 30px;
+        margin-left: 30px;
+    }
+
+    .card:hover {
+        transform: scale(1.1); /* Increase the scale for more zoom effect */
+        transition: transform 0.5s ease;
+        z-index: 1; /* Ensure the hovered card appears forward */
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8); /* Add a dark shadow */
+    }
+
+   
+
+    
+</style>
+<br/>
+    <h1>Search Results</h1>
+    <hr>
+    {% if query %}
+        <p>Results for: <strong>{{ query }}</strong></p>
+
+        <hr>
+        <h2>Posts</h2>
+        {% if posts %}
+            <div class="container">
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    {% for post in posts %}
+                        <div class="col">
+                            <div class="card h-100">
+                                <a href="{% url 'article-detail' post.pk %}" class="stretched-link">
+                                    <img src="{{ post.img.url }}" class="card-img-top" alt="{{ post.title }}" style="max-height: 200px; object-fit: cover;">
+                                </a>
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <a href="{% url 'article-detail' post.pk %}" style="font-weight: bold; color: black;">
+                                            {{ post.title }}
+                                        </a>
+                                    </h5>
+                                    <p class="card-text">
+                                        <a href="{% url 'cat' post.cat.title %}" class="badge badge-primary">
+                                            {{ post.cat }}
+                                        </a>
+                                        <br/>
+                                        <small class="text-muted">{{ post.author.first_name }} {{ post.author.last_name }} - {{ post.add_date }}</small>
+                                    </p>
+                                    <p class="card-text">{{ post.content | truncatewords_html:10 | safe }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <p>No posts found.</p>
+        {% endif %}
+        <hr>
+    
+        {% if categories %}
+            
+            <h2>Categories</h2>
+            <div class="list-group">
+                {% for category in categories %}
+                    <a href="{% url 'cat' category.title %}" class="list-group-item list-group-item-action">{{ category.title }}</a>
+                {% endfor %}
+            </div>
+        
+            
+        {% endif %}
+        <hr>
+        
+        <h2>Authors</h2>
+        {% if authors %}
+            <div class="container">
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    {% for author in authors %}
+                        <div class="col">
+                            <div class="card mb-3">
+                                <div class="row g-0">
+                                    <div class="col-md-4">
+                                        {% if author.profile.profile_pic %}
+                                            <img src="{{ author.profile.profile_pic.url }}" class="rounded-circle border border-primary" style="width: 100px; height: 100px;">
+                                        {% else %}
+                                            <img src="{% static 'theblog/images/default profile.png' %}" class="rounded-circle border border-primary" style="width: 100px; height: 100px;">
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-8">
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                {{ author.first_name }} {{ author.last_name }} | 
+                                                {{ author.username }}
+                                            </h5>      
+
+                                            <p class="small text-muted">
+                                                <a href="{% url 'show_profile_page' author.profile.id %}">Profile Page</a>
+                                                {% if author.profile.website_url %}
+                                                    | <a href="{{ author.profile.website_url }}">Website</a> 
+                                                {% endif %}
+                                                {% if author.profile.facebook_url %}
+                                                    | <a href="{{ author.profile.facebook_url }}">Facebook</a>
+                                                {% endif %}
+                                                {% if author.profile.insta_url %}
+                                                    | <a href="{{ author.profile.insta_url }}">Insta</a>
+                                                {% endif %}
+                                                {% if author.profile.twitter_url %}
+                                                    | <a href="{{ author.profile.twitter_url }}">Twitter</a>
+                                                {% endif %}
+                                            </p> 
+                                        
+                                            <p class="card-text"> 
+                                                {{ author.profile.bio | default:"No bio available." }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <p>No authors found.</p>
+        {% endif %}
+    {% else %}
+    <br/>
+        <h3><p>No search query provided.</p></h3>
+    {% endif %}
+    
+    <br><br/>
+    <a href="{% url 'Home' %}"><button type="button" class="btn btn-secondary">Back</button></a>
+
+
+<!-- Pagination Controls -->
+<div class="d-flex justify-content-center mt-4">
+    {% if is_paginated %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">&laquo; first</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">previous</a>
+                    </li>
+                {% endif %}
+                <li class="page-item disabled">
+                    <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                </li>
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+
+
+
+
+{% endblock %}
